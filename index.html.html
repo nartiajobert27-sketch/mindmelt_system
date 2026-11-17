@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Melt - Student Quiz Web App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>Mind Melt</h1>
+            <p class="subtitle">Simple Student Quiz & Exam Application</p>
+        </header>
+
+        <!-- MAIN NAVIGATION BAR -->
+        <div class="nav-bar">
+            <button class="nav-btn active" id="navHomeBtn" onclick="switchTab('home')">🏠 Quizzes (Home)</button>
+            <button class="nav-btn btn-add-quiz" id="navAddQuizBtn" onclick="switchTab('addQuiz')">➕ Add Quiz / Create Quiz</button>
+            <button class="nav-btn" id="navProfileBtn" onclick="openProfileModal()">👤 My Profile</button>
+            <button class="nav-btn btn-secondary" id="navAdminBtn" onclick="openAdminModal()">🔐 Admin Portal</button>
+        </div>
+
+        <!-- USER INFO BAR -->
+        <div class="user-bar" id="userBar">
+            <div>
+                <strong>Student:</strong> <span id="displayStudentName">Not Logged In</span> | 
+                <strong>ID:</strong> <span id="displayStudentId">N/A</span> | 
+                <strong>Section:</strong> <span id="displayStudentSection">N/A</span>
+            </div>
+            <button class="nav-btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openProfileModal()">Edit</button>
+        </div>
+
+        <!-- 1. HOME SCREEN (QUIZZES LIST) -->
+        <div id="mainMenuScreen">
+            <!-- PROMINENT ADD QUIZ CALLOUT BANNER -->
+            <div class="create-banner" onclick="switchTab('addQuiz')">
+                <h3>➕ Don't see your topic? Create Your Own Quiz Here!</h3>
+                <p style="margin: 0; font-size: 14px;">Add custom questions, choices, explanations, and share with classmates.</p>
+            </div>
+
+            <!-- MY CUSTOM QUIZZES SECTION (IF ANY EXISTS) -->
+            <div id="customQuizzesContainer" class="hidden">
+                <h2 style="color: #059669; margin-top: 0;">✨ My Custom Quizzes</h2>
+                <div class="category-grid" id="customQuizGrid">
+                    <!-- Dynamic custom quizzes inserted here -->
+                </div>
+                <hr style="border: 0; border-top: 2px dashed #bae6fd; margin: 30px 0;">
+            </div>
+
+            <!-- DEFAULT BUILT-IN CATEGORIES -->
+            <h2 style="color: #0369a1; margin-top: 0;">Standard Quiz Categories:</h2>
+            <p style="color: #64748b; margin-top: -8px;">Each standard quiz contains 20 comprehensive questions.</p>
+
+            <div class="category-grid">
+                <div class="category-card" onclick="selectCategory('science')">
+                    <div class="category-icon">🪐🔬</div>
+                    <h3>General Science</h3>
+                    <p>20 Questions</p>
+                </div>
+                <div class="category-card" onclick="selectCategory('math')">
+                    <div class="category-icon">📐🔢</div>
+                    <h3>Mathematics</h3>
+                    <p>20 Questions</p>
+                </div>
+                <div class="category-card" onclick="selectCategory('english')">
+                    <div class="category-icon">📚✍️</div>
+                    <h3>English Literature</h3>
+                    <p>20 Questions</p>
+                </div>
+                <div class="category-card" onclick="selectCategory('history')">
+                    <div class="category-icon">🌍🏛️</div>
+                    <h3>World History</h3>
+                    <p>20 Questions</p>
+                </div>
+                <div class="category-card" onclick="selectCategory('it')">
+                    <div class="category-icon">💻⚡</div>
+                    <h3>Computer & IT</h3>
+                    <p>20 Questions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ADD QUIZ / CREATE CUSTOM QUIZ SCREEN -->
+        <div id="addQuizScreen" class="hidden">
+            <h2 style="color: #16a34a; margin-top: 0;">➕ Create A Custom Quiz</h2>
+            <p style="color: #64748b; margin-top: -8px;">Build your own test with customized questions, answer choices, and timer settings.</p>
+
+            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: 8px; margin-bottom: 20px;">
+                <label><strong>Quiz Title / Subject Name:</strong></label>
+                <input type="text" id="customQuizTitle" placeholder="e.g., Biology Chapter 1 Review">
+
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label><strong>Category Icon Emoji:</strong></label>
+                        <select id="customQuizIcon">
+                            <option value="📝">📝 General Note</option>
+                            <option value="🧪">🧪 Science Lab</option>
+                            <option value="🔢">🔢 Math / Logic</option>
+                            <option value="💻">💻 Computer / Coding</option>
+                            <option value="📖">📖 Reading / History</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label><strong>Time per Question (Seconds):</strong></label>
+                        <input type="number" id="customQuizTimer" value="20" min="5" max="120">
+                    </div>
+                </div>
+            </div>
+
+            <h3>Questions List:</h3>
+            <div id="builderQuestionsContainer">
+                <!-- Dynamically added question builder cards -->
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: space-between;">
+                <button class="nav-btn btn-secondary" onclick="addQuestionToBuilder()">+ Add Another Question</button>
+                <div>
+                    <button class="nav-btn btn-secondary" onclick="switchTab('home')">Cancel</button>
+                    <button class="nav-btn btn-add-quiz" onclick="saveCustomQuiz()">💾 Save & Publish Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. QUIZ TAKING SCREEN -->
+        <div id="quizScreen" class="hidden">
+            <div class="quiz-header">
+                <span id="quizCategoryTitle">Category Title</span>
+                <span>Question <span id="currentQNum">1</span>/<span id="totalQNum">20</span></span>
+                <span class="timer-box"> Time: <span id="timerText">20</span>s</span>
+            </div>
+
+            <div class="question-text" id="questionText">Loading question...</div>
+
+            <div class="options-list" id="optionsContainer">
+                <!-- Option buttons dynamically generated -->
+            </div>
+
+            <div class="explanation-box" id="explanationBox">
+                <strong>Explanation:</strong> <span id="explanationText"></span>
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="nav-btn btn-secondary" onclick="confirmQuit()">Quit Quiz</button>
+                <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <!-- 4. RESULTS SCREEN -->
+        <div id="resultsScreen" class="hidden" style="text-align: center;">
+            <h2 style="color: #0284c7;">Quiz Complete! 🎉</h2>
+            <div style="font-size: 22px; margin: 20px 0;">
+                Your Score: <strong id="finalScoreText" style="color: #0369a1;">0 / 20</strong>
+                <br>
+                Percentage: <strong id="finalPercentText">0%</strong>
+            </div>
+            <p id="feedbackMessage">Good effort!</p>
+
+            <div style="margin-top: 20px;">
+                <button class="nav-btn" onclick="showReviewScreen()">Review Answers</button>
+                <button class="nav-btn btn-secondary" onclick="switchTab('home')">Back to Main Menu</button>
+            </div>
+        </div>
+
+        <!-- 5. REVIEW SCREEN -->
+        <div id="reviewScreen" class="hidden">
+            <h2>Review Quiz Answers</h2>
+            <div id="reviewContainer">
+                <!-- Review cards will be placed here -->
+            </div>
+            <button class="nav-btn btn-secondary" onclick="switchTab('home')" style="margin-top: 15px;">Back to Home</button>
+        </div>
+
+        <!-- 6. ADMIN SCREEN -->
+        <div id="adminScreen" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <h2 style="margin: 0; color: #0369a1;">🔐 Admin Portal - Student Results</h2>
+                <button class="nav-btn btn-secondary" onclick="switchTab('home')">Exit Admin</button>
+            </div>
+
+            <div style="margin: 15px 0; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="maskToggle" onchange="renderAdminTable()"> 
+                    <strong>Hide/Mask Student Information (Privacy Mode)</strong>
+                </label>
+            </div>
+
+            <table id="scoresTable">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Student Name</th>
+                        <th>ID / LRN</th>
+                        <th>Section</th>
+                        <th>Category</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <!-- Dynamic rows -->
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
+                <button class="nav-btn btn-secondary" onclick="exportScoresCSV()">📥 Export Scores (CSV)</button>
+                <button class="nav-btn btn-danger" onclick="resetAllScores()">Reset / Restore All Scores</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2-SECOND SUBJECT POPUP OVERLAY -->
+    <div class="popup-overlay" id="loadingPopup">
+        <div class="floating-icons" id="popupIcons">🪐🔬</div>
+        <h2 id="popupCategoryName">Loading Category...</h2>
+        <p>Get ready! Exam starting in 2 seconds...</p>
+    </div>
+
+    <!-- STUDENT PROFILE MODAL -->
+    <div class="modal-bg" id="profileModal">
+        <div class="modal-content">
+            <h3>Student Profile Information</h3>
+            <p style="font-size: 13px; color: #666;">Please enter your student info before taking exams.</p>
+            
+            <label>Full Name:</label>
+            <input type="text" id="inputName" placeholder="e.g. Juan Cruz">
+
+            <label>Student ID / LRN:</label>
+            <input type="text" id="inputId" placeholder="e.g. 2024-10023">
+
+            <label>Grade / Section:</label>
+            <input type="text" id="inputSection" placeholder="e.g. BSIT 1-A">
+
+            <div style="text-align: right; margin-top: 10px;">
+                <button class="nav-btn" onclick="saveStudentProfile()">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal-bg" id="adminModal">
+        <div class="modal-content">
+            <h3>Admin Access Passcode</h3>
+            <p style="font-size: 13px; color: #666;">Enter passcode to access student score reports.</p>
+            
+            <label>Passcode (Default: <code>admin123</code>):</label>
+            <input type="password" id="adminPassInput" placeholder="Enter password">
+            
+            <div style="text-align: right; margin-top: 10px;">
+                <button class="nav-btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+                <button class="nav-btn" onclick="loginAdmin()">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
